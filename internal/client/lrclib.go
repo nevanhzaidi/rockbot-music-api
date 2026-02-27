@@ -8,14 +8,22 @@ import (
 	"net/url"
 )
 
-// LrcLibClient handles communication with the LrcLib API.
+type LrcLibSong struct {
+	ID           int     `json:"id"`
+	TrackName    string  `json:"trackName"`
+	ArtistName   string  `json:"artistName"`
+	AlbumName    string  `json:"albumName"`
+	Duration     float64 `json:"duration"`
+	Instrumental bool    `json:"instrumental"`
+	PlainLyrics  string  `json:"plainLyrics"`
+	SyncedLyrics string  `json:"syncedLyrics"`
+}
+
 type LrcLibClient struct {
 	httpClient *http.Client
 	baseURL    string
 }
 
-// NewLrcLibClient creates a new LrcLib API client.
-// baseURL is the LrcLib API base URL (e.g. "https://lrclib.net/api").
 func NewLrcLibClient(baseURL string) *LrcLibClient {
 	return &LrcLibClient{
 		httpClient: &http.Client{},
@@ -23,9 +31,7 @@ func NewLrcLibClient(baseURL string) *LrcLibClient {
 	}
 }
 
-// SearchSongs searches for songs by a query string.
-// It calls GET https://lrclib.net/api/search?q=<query>
-// Returns the raw JSON response from the API.
+
 func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
 	endpoint := fmt.Sprintf("%s/search?q=%s", c.baseURL, url.QueryEscape(query))
 
@@ -52,4 +58,32 @@ func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
 	}
 
 	return json.RawMessage(body), nil
+}
+
+func (c *LrcLibClient) GetSongByID(id int) (*LrcLibSong, error) {
+	endpoint := fmt.Sprintf("%s/get/%d", c.baseURL, id)
+
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("creating request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "RockbotMusicAPI/1.0")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("calling lrclib api: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("lrclib api returned status: %d", resp.StatusCode)
+	}
+
+	var song LrcLibSong
+	if err := json.NewDecoder(resp.Body).Decode(&song); err != nil {
+		return nil, fmt.Errorf("decoding response: %w", err)
+	}
+
+	return &song, nil
 }
