@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/rockbot/music-api/internal/cache"
 	"github.com/rockbot/music-api/internal/client"
 	"github.com/rockbot/music-api/internal/repository"
 )
@@ -40,7 +42,18 @@ func main() {
 	}
 	fmt.Println("Connected to PostgreSQL")
 
-	lrclib := client.NewLrcLibClient(lrclibURL)
+	redisAddr := os.Getenv("REDIS_URL")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+
+	redisCache := cache.NewRedisCache(redisAddr)
+	if err := redisCache.Ping(context.Background()); err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	fmt.Println("Connected to Redis")
+
+	lrclib := client.NewLrcLibClient(lrclibURL, redisCache)
 	playlistRepo := repository.NewPlaylistRepository(db)
 
 	mux := http.NewServeMux()
