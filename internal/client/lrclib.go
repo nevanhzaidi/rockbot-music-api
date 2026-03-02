@@ -106,13 +106,15 @@ func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
 	cacheKey := fmt.Sprintf("lrclib:search:%s", query)
 
 	// Check cache first
-	cached, err := c.cache.Get(ctx, cacheKey)
-	if err == nil {
-		fmt.Printf("cache hit: %s\n", cacheKey)
-		return json.RawMessage(cached), nil
-	}
-	if err != redis.Nil {
-		fmt.Printf("cache error for key %s: %v\n", cacheKey, err)
+	if c.cache != nil {
+		cached, err := c.cache.Get(ctx, cacheKey)
+		if err == nil {
+			fmt.Printf("cache hit: %s\n", cacheKey)
+			return json.RawMessage(cached), nil
+		}
+		if err != redis.Nil {
+			fmt.Printf("cache error for key %s: %v\n", cacheKey, err)
+		}
 	}
 
 	// Cache miss — fetch from LrcLib API
@@ -142,8 +144,10 @@ func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
 	}
 
 	// Store in cache
-	if setErr := c.cache.Set(ctx, cacheKey, string(body), searchCacheTTL); setErr != nil {
-		fmt.Printf("cache set error for key %s: %v\n", cacheKey, setErr)
+	if c.cache != nil {
+		if setErr := c.cache.Set(ctx, cacheKey, string(body), searchCacheTTL); setErr != nil {
+			fmt.Printf("cache set error for key %s: %v\n", cacheKey, setErr)
+		}
 	}
 
 	return json.RawMessage(body), nil
@@ -154,16 +158,18 @@ func (c *LrcLibClient) GetSongByID(id int) (*LrcLibSong, error) {
 	cacheKey := fmt.Sprintf("lrclib:song:%d", id)
 
 	// Check cache first
-	cached, err := c.cache.Get(ctx, cacheKey)
-	if err == nil {
-		var song LrcLibSong
-		if jsonErr := json.Unmarshal([]byte(cached), &song); jsonErr == nil {
-			fmt.Printf("cache hit: %s\n", cacheKey)
-			return &song, nil
+	if c.cache != nil {
+		cached, err := c.cache.Get(ctx, cacheKey)
+		if err == nil {
+			var song LrcLibSong
+			if jsonErr := json.Unmarshal([]byte(cached), &song); jsonErr == nil {
+				fmt.Printf("cache hit: %s\n", cacheKey)
+				return &song, nil
+			}
 		}
-	}
-	if err != nil && err != redis.Nil {
-		fmt.Printf("cache error for key %s: %v\n", cacheKey, err)
+		if err != redis.Nil {
+			fmt.Printf("cache error for key %s: %v\n", cacheKey, err)
+		}
 	}
 
 	// Cache miss — fetch from LrcLib API
@@ -193,9 +199,11 @@ func (c *LrcLibClient) GetSongByID(id int) (*LrcLibSong, error) {
 	}
 
 	// Store in cache
-	songJSON, _ := json.Marshal(song)
-	if setErr := c.cache.Set(ctx, cacheKey, string(songJSON), songCacheTTL); setErr != nil {
-		fmt.Printf("cache set error for key %s: %v\n", cacheKey, setErr)
+	if c.cache != nil {
+		songJSON, _ := json.Marshal(song)
+		if setErr := c.cache.Set(ctx, cacheKey, string(songJSON), songCacheTTL); setErr != nil {
+			fmt.Printf("cache set error for key %s: %v\n", cacheKey, setErr)
+		}
 	}
 
 	return &song, nil
