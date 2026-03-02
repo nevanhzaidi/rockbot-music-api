@@ -176,6 +176,13 @@ func addSongHandler(repo *repository.PlaylistRepository, lrclib *client.LrcLibCl
 			return
 		}
 
+		if input.Rating < 0 || input.Rating > 5 {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{"error": "rating must be between 0 and 5"})
+			return
+		}
+
 		apiSong, err := lrclib.GetSongByID(input.LrclibID)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")

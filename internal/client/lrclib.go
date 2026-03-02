@@ -16,6 +16,9 @@ import (
 const (
 	searchCacheTTL = 5 * time.Minute
 	songCacheTTL   = 1 * time.Hour
+	httpTimeout    = 10 * time.Second
+	maxRetries     = 3
+	baseRetryDelay = 500 * time.Millisecond
 )
 
 type LrcLibSong struct {
@@ -37,10 +40,65 @@ type LrcLibClient struct {
 
 func NewLrcLibClient(baseURL string, cache *cache.RedisCache) *LrcLibClient {
 	return &LrcLibClient{
-		httpClient: &http.Client{},
+		httpClient: &http.Client{Timeout: httpTimeout},
 		baseURL:    baseURL,
 		cache:      cache,
 	}
+}
+
+// doWithRetry executes an HTTP request with automatic retry and exponential backoff.
+//
+// Why retry? External APIs like LrcLib can experience transient failures — temporary
+// network issues, rate limiting, or server-side errors (5xx). Rather than failing
+// immediately, we retry with increasing delays to give the upstream service time to recover.
+//
+// Retry strategy:
+//   - Max attempts: 3 (configurable via maxRetries constant)
+//   - Backoff: exponential — 500ms, 1s, 2s (doubles each attempt via bit shift)
+//   - Retryable conditions: network errors (timeouts, DNS failures) and 5xx status codes
+//   - Non-retryable: 4xx client errors are returned immediately (bad request, not found, etc.)
+//
+// Important implementation details:
+//   - The response body is closed before each retry to prevent resource leaks
+//   - On success, the caller is responsible for closing the response body
+//   - The last error is wrapped in the final error message for debugging context
+//
+// Limitations:
+//   - Uses time.Sleep which blocks the goroutine; for high-throughput services,
+//     a context-based approach with timers would be more appropriate
+//   - No jitter is added to the backoff, which could cause thundering herd issues
+//     if many clients retry simultaneously
+func (c *LrcLibClient) doWithRetry(req *http.Request) (*http.Response, error) {
+	var lastErr error
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Wait before retrying (skip delay on the first attempt)
+		if attempt > 0 {
+			delay := baseRetryDelay * (1 << (attempt - 1)) // exponential: 500ms, 1s, 2s
+			fmt.Printf("retry attempt %d/%d after %v\n", attempt, maxRetries-1, delay)
+			time.Sleep(delay)
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			// Network-level error (timeout, DNS, connection refused) — retry
+			lastErr = err
+			continue
+		}
+
+		// Server error (5xx) — the upstream is struggling, worth retrying
+		// We must close the body before retrying to avoid leaking connections
+		if resp.StatusCode >= 500 {
+			resp.Body.Close()
+			lastErr = fmt.Errorf("lrclib api returned status: %d", resp.StatusCode)
+			continue
+		}
+
+		// Success or client error (4xx) — return as-is, no retry needed
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("all %d retries failed: %w", maxRetries, lastErr)
 }
 
 func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
@@ -68,7 +126,7 @@ func (c *LrcLibClient) SearchSongs(query string) (json.RawMessage, error) {
 
 	req.Header.Set("User-Agent", "RockbotMusicAPI/1.0")
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.doWithRetry(req)
 	if err != nil {
 		return nil, fmt.Errorf("calling lrclib api: %w", err)
 	}
@@ -119,7 +177,7 @@ func (c *LrcLibClient) GetSongByID(id int) (*LrcLibSong, error) {
 
 	req.Header.Set("User-Agent", "RockbotMusicAPI/1.0")
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.doWithRetry(req)
 	if err != nil {
 		return nil, fmt.Errorf("calling lrclib api: %w", err)
 	}
