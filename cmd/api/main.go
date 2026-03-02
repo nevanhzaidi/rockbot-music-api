@@ -17,9 +17,8 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// Load .env file if present (optional in Docker where env vars are injected)
+	godotenv.Load()
 
 	lrclibURL := os.Getenv("LRCLIB_BASE_URL")
 	if lrclibURL == "" {
