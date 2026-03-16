@@ -1,0 +1,106 @@
+.search-page .search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  max-width: 420px;
+}
+
+.search-page .search-form input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--bg-card);
+  color: var(--text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-page .search-form input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-page .search-form button {
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.search-page .search-form button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.search-page .search-form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.search-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-result-item:hover {
+  border-color: rgba(196, 30, 58, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.search-result-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.search-result-title {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.9375rem;
+}
+
+.search-result-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.search-result-actions .btn {
+  flex-shrink: 0;
+}
+
+.search-hint {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0;
+}
+
+.search-empty {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  text-align: center;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+}

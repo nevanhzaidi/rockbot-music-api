@@ -1,0 +1,104 @@
+.playlists-create {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.playlists-create input {
+  padding: 0.65rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.15s ease;
+}
+
+.playlists-create input[placeholder="Playlist name"] {
+  min-width: 200px;
+}
+
+.playlists-create input[placeholder*="Description"] {
+  min-width: 200px;
+  flex: 1;
+}
+
+.playlists-create button {
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.playlists-create button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.playlists-create button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.playlists-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.playlists-list li {
+  margin: 0;
+}
+
+.playlist-card {
+  display: block;
+  padding: 1.125rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow);
+}
+
+.playlist-card:hover {
+  background: var(--bg-hover);
+  border-color: rgba(196, 30, 58, 0.4);
+  box-shadow: var(--shadow-md);
+}
+
+.playlist-card-name {
+  display: block;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--text-h);
+}
+
+.playlist-card-desc {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.playlists-empty {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
