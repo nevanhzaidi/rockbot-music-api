@@ -13,6 +13,7 @@ type Playlist struct {
 type PlaylistSong struct {
 	ID         string    `json:"id"`
 	PlaylistID string    `json:"playlist_id"`
+	LrclibID   int       `json:"lrclib_id,omitempty"` // LrcLib track ID; used to fetch lyrics
 	TrackName  string    `json:"track_name"`
 	ArtistName string    `json:"artist_name"`
 	AlbumName  string    `json:"album_name"`
