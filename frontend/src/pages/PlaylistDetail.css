@@ -1,0 +1,115 @@
+.playlist-detail-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.playlist-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.playlist-back:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.playlist-detail-header h1 {
+  margin: 0 0 0.35rem;
+  color: var(--text-h);
+  font-size: 1.5rem;
+}
+
+.playlist-detail-desc {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.playlist-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.playlist-detail-actions .btn-danger {
+  background: var(--error);
+}
+
+.playlist-detail-actions .btn-danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.playlist-songs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.playlist-song-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.playlist-song-item:hover {
+  border-color: rgba(196, 30, 58, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+.playlist-song-info {
+  min-width: 0;
+}
+
+.playlist-song-title {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.9375rem;
+}
+
+.playlist-song-meta {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.playlist-song-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.playlist-song-no-lyrics {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  padding: 0.25rem 0;
+}
+
+.playlist-detail-empty {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
